@@ -40,7 +40,7 @@ OPERATIONS = {
 
 def calc(s):
     nums = re.split(f"[{''.join(OPERATIONS.keys())}]", s)
-    pos = 
+    # pos =
 
 
 print(calc('3+4/2-12'))
