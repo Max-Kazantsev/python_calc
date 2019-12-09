@@ -1,18 +1,27 @@
 """ Калькулятор на основе словаря """
 
 
+#pylint: disable=too-few-public-methods
 class Calc:
+    """ Класс расширяемого калькулятора на основе словаря """
     operators = {}
 
     @staticmethod
     def count(expr):
-        stack = [0]
+        """
+        Функция рассчитывающая значение выражения
+        на основе известных классу опереаторов
+        """
+        stack = []
         for token in expr.split(' '):
             if token in Calc.operators:
-                op2, op1 = stack.pop(), stack.pop()
+                op2 = stack.pop()
+                op1 = stack.pop()
                 stack.append(Calc.operators[token][0](op1, op2))
             else:
                 stack.append(float(token))
+        if len(stack) > 0:
+            raise ValueError
         return stack.pop()
 
 
@@ -50,44 +59,39 @@ def my_mult(a, b):
     return a * b
 
 
-def opn(code: str):
+def rpn(code: str):
     op_stack = []
     res = []
-    for c in code:
-        if c in '0123456789':
-            res.append(c)
-        elif c in Calc.operators:  # i -бинарная операция
-            token_tmp = ''  # смотрим на вверх стека
+    for symbol in code.split(' '):
+        if symbol in Calc.operators:  # i -бинарная операция
+            token_tmp = ''
             if len(op_stack) > 0:
-                token_tmp = op_stack[len(op_stack) - 1]  # смотрим на вверх стека
+                token_tmp = op_stack[-1]  # смотрим на вверх стека
                 while len(op_stack) > 0 and token_tmp in Calc.operators:  # пока стек >0
                     # сравнием приоритет токена в строке и приоритет операци  в стеке операций
-                    if Calc.operators[c][1] <= Calc.operators[token_tmp][1]:
-                        res.append(op_stack.pop())  # если в стеке операция выше,то выталкиваем его в выходную строку
+                    if Calc.operators[symbol][1] <= Calc.operators[token_tmp][1]:
+                        # если в стеке операция выше,то выталкиваем его в выходную строку
+                        res.append(op_stack.pop())
                     else:  # иначе выходим из данного цикла
                         break
-            op_stack.append(c)  # тогда выйдя из цикла,добавим операцию в стек        
-        elif c == '(':
-            op_stack.append(c)
-        elif c == ')':  # закрывающая )
-            token_tmp = op_stack[len(op_stack) - 1]  # смотрим на вверх стека
-            while token_tmp != '(' or len(op_stack) > 1:
-                res.append(op_stack.pop())
-                token_tmp = op_stack[len(op_stack) - 1]
+            op_stack.append(symbol)  # тогда выйдя из цикла,добавим операцию в стек        
+        elif symbol == '(':
+            op_stack.append(symbol)
+        elif symbol == ')':  # закрывающая )
+            for token_tmp in op_stack[::-1]:
                 if token_tmp == '(':
                     op_stack.pop()
+                    break
+                res.append(op_stack.pop())
         else:
-            raise ValueError
+            int(symbol)
+            res.append(symbol)
+
     while len(op_stack) > 0:
-        token_tmp = op_stack[len(op_stack) - 1]
-        if token_tmp == "(":
+        token_tmp = op_stack.pop()
+        if token_tmp == '(':
             raise RuntimeError("No right paren")
-        res.append(op_stack.pop())
-    return res
+        res.append(token_tmp)
 
+    return ' '.join(res)
 
-print(opn('(3+6)/2'))
-print(opn('3+6/2^2'))
-print(' '.join(opn('3+6/2^2')))
-print(Calc.count(' '.join(opn('3+6/2^2'))))
-# print(Calc.count('6 10 + 4 - 1 1 2 * + / 1 +'))
