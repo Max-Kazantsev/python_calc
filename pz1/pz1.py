@@ -6,8 +6,8 @@ def my_sum(a, b):
 
 
 if __name__ == '__main__':
-    # Осторожно, Python3.8
-    while ans := '' != 'exit':
+    ans = ''
+    while ans != 'exit':
         ans = input('Введите пример:')
         a, b = ans.split('+')
         print(f"По-моему это: {my_sum(int(a), int(b))}")
