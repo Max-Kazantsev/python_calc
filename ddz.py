@@ -27,7 +27,6 @@ class Calc:
 
 def add_to_calc(operator_sign, priority):
     """ Add module to calculator"""
-
     def wrapper_add_to_calc(operator):
         Calc.operators[operator_sign] = (operator, priority)
         return operator
@@ -57,7 +56,7 @@ def my_pow(a, b):
 
 
 @add_to_calc('*', 5)
-def my_mult(a, b):
+def my_mul(a, b):
     return a * b
 
 
@@ -72,21 +71,22 @@ def rpn(code: str):
         if symbol in Calc.operators:  # i -бинарная операция
             if op_stack:
                 while op_stack and op_stack[-1] in Calc.operators:  # пока стек >0
-                    # сравнием приоритет токена в строке и приоритет операци  в стеке операций
+                    # сравнием приоритет операции в строке и приоритет операции в стеке операций
                     if Calc.operators[symbol][1] <= Calc.operators[op_stack[-1]][1]:
                         # если в стеке операция выше,то выталкиваем его в выходную строку
                         res.append(op_stack.pop())
-                    else:  # иначе выходим из данного цикла
+                    else:
                         break
-            op_stack.append(symbol)  # тогда выйдя из цикла,добавим операцию в стек        
+            op_stack.append(symbol)
         elif symbol == '(':
             op_stack.append(symbol)
         elif symbol == ')':  # закрывающая )
             token_tmp = op_stack.pop()
-            while token_tmp != '(':#op_stack[::-1]:
+            while token_tmp != '(':
                 res.append(token_tmp)
                 token_tmp = op_stack.pop()
         else:
+            # Проверка что symbol - целочисленное
             int(symbol)
             res.append(symbol)
 
