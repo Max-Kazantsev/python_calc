@@ -1,26 +1,26 @@
-""" Калькулятор на основе словаря """
+""" Расширяемый калькулятор на основе словаря """
+# pylint: disable=too-few-public-methods
 
 
-#pylint: disable=too-few-public-methods
 class Calc:
     """ Класс расширяемого калькулятора на основе словаря """
     operators = {}
 
     @staticmethod
-    def count(expr):
+    def count(expr: str):
         """
         Функция рассчитывающая значение выражения
         на основе известных классу опереаторов
         """
         stack = []
-        for token in expr.split(' '):
+        for token in rpn(expr).split(' '):
             if token in Calc.operators:
                 op2 = stack.pop()
                 op1 = stack.pop()
                 stack.append(Calc.operators[token][0](op1, op2))
             else:
                 stack.append(float(token))
-        if len(stack) > 0:
+        if len(stack) != 1:
             raise ValueError
         return stack.pop()
 
@@ -34,6 +34,8 @@ def add_to_calc(operator_sign, priority):
     return wrapper_add_to_calc
 
 
+# pylint: disable=missing-function-docstring
+# pylint: disable=invalid-name
 @add_to_calc('-', 2)
 def my_diff(a, b):
     return a-b
@@ -60,16 +62,18 @@ def my_mult(a, b):
 
 
 def rpn(code: str):
+    """
+    Преобразование примеров из привычной записи
+    в обратную польскую нотацию
+    """
     op_stack = []
     res = []
     for symbol in code.split(' '):
         if symbol in Calc.operators:  # i -бинарная операция
-            token_tmp = ''
-            if len(op_stack) > 0:
-                token_tmp = op_stack[-1]  # смотрим на вверх стека
-                while len(op_stack) > 0 and token_tmp in Calc.operators:  # пока стек >0
+            if op_stack:
+                while op_stack and op_stack[-1] in Calc.operators:  # пока стек >0
                     # сравнием приоритет токена в строке и приоритет операци  в стеке операций
-                    if Calc.operators[symbol][1] <= Calc.operators[token_tmp][1]:
+                    if Calc.operators[symbol][1] <= Calc.operators[op_stack[-1]][1]:
                         # если в стеке операция выше,то выталкиваем его в выходную строку
                         res.append(op_stack.pop())
                     else:  # иначе выходим из данного цикла
@@ -78,16 +82,15 @@ def rpn(code: str):
         elif symbol == '(':
             op_stack.append(symbol)
         elif symbol == ')':  # закрывающая )
-            for token_tmp in op_stack[::-1]:
-                if token_tmp == '(':
-                    op_stack.pop()
-                    break
-                res.append(op_stack.pop())
+            token_tmp = op_stack.pop()
+            while token_tmp != '(':#op_stack[::-1]:
+                res.append(token_tmp)
+                token_tmp = op_stack.pop()
         else:
             int(symbol)
             res.append(symbol)
 
-    while len(op_stack) > 0:
+    while op_stack:
         token_tmp = op_stack.pop()
         if token_tmp == '(':
             raise RuntimeError("No right paren")
@@ -95,3 +98,6 @@ def rpn(code: str):
 
     return ' '.join(res)
 
+
+if __name__ == '__main__':
+    print(rpn('( 6 + 10 - 4 ) / ( 1 + 1 * 2 ) + 1'))
