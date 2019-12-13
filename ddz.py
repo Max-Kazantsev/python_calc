@@ -26,7 +26,7 @@ class Calc:
 
 
 def add_to_calc(operator_sign, priority):
-    """ Add module to calculator"""
+    """ Добавление модулей к калькулятору """
     def wrapper_add_to_calc(operator):
         Calc.operators[operator_sign] = (operator, priority)
         return operator
